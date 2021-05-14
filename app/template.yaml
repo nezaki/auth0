@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  auth0-practice
+  Sample SAM Template for auth0-practice
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Api:
+    Auth:
+      # https://docs.aws.amazon.com/ja_jp/serverless-application-model/latest/developerguide/sam-property-api-lambdatokenauthorizer.html
+      Authorizers:
+        LambdaTokenAuth:
+          FunctionArn: !GetAtt AuthorizerFunction.Arn
+          FunctionPayloadType: TOKEN
+          Identity:
+            Header: Authorization
+            ReauthorizeEvery: 0
+      DefaultAuthorizer: LambdaTokenAuth
+
+  Function:
+    Timeout: 25
+    Runtime: python3.8
+    Environment:
+      Variables:
+        LOG_LEVEL: DEBUG
+        POWERTOOLS_SERVICE_NAME: auth0-practice
+        POWERTOOLS_LOGGER_LOG_EVENT: true
+        AUTH0_DOMAIN:
+        AUTH0_CLIENT_ID:
+
+Resources:
+  AuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tmp/
+      Handler: auth.authorizer.lambda_handler
+
+  HelloWorldFunction:
+    # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: tmp/
+      Handler: hello_world.app.lambda_handler
+      Runtime: python3.8
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get

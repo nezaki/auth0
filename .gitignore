@@ -269,3 +269,4 @@ $RECYCLE.BIN/
 .aws-sam/
 
 requirements.txt
+.idea/
